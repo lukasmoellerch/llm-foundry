@@ -71,6 +71,7 @@ class HuggingFaceModelWithZLoss(HuggingFaceModel):
             batch = {
                 k: v for k, v in batch.items() if k in self.model_forward_args
             }
+            batch["attention_mask"] = batch["attention_mask"].bool()
             output = self.model(**batch)  # type: ignore (thirdparty)
         else:
             raise ValueError(
