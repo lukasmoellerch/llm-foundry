@@ -8,11 +8,11 @@ model:
   name: hf_causal_lm
   pretrained: true
   pretrained_model_name_or_path: replit/replit-code-v1-3b
-  config_overrides:
-    attn_config:
-      attn_impl: triton
-      # Set this to `true` if using `train_loader.dataset.packing_ratio` below
-      attn_uses_sequence_id: false
+#   config_overrides:
+#     attn_config:
+#       attn_impl: triton
+#       # Set this to `true` if using `train_loader.dataset.packing_ratio` below
+#       attn_uses_sequence_id: false
 
 # Tokenizer
 tokenizer:
