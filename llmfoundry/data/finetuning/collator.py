@@ -246,6 +246,7 @@ class Seq2SeqFinetuningCollator:
                 batch[k] = v[:, -keep_tokens:].contiguous()
             else:
                 batch[k] = v[:, :keep_tokens].contiguous()
+        batch['attention_mask'] = batch['attention_mask'].bool()
 
         return batch
 
