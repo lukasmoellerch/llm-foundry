@@ -119,14 +119,14 @@ def prepare_hf_causal_lm_model_for_fsdp(model: PreTrainedModel) -> None:
     if isinstance(causal_base_model, OPTDecoder):
         model.model._fsdp_wrap = False
     model_block = hf_get_hidden_layers(model)  # type: ignore
-    lm_head = model.get_output_embeddings()
+    # lm_head = model.get_output_embeddings()
     # some models (OPT) implement .get_input_embeddings for the causal subclass
     # but all of them implement it for the base model
     # tied_embeddings = causal_base_model.get_input_embeddings()  # type: ignore
     modules = {
         'base_model': causal_base_model,
         'model_block': model_block,
-        'lm_head': lm_head,
+        # 'lm_head': lm_head,
        # 'tied_embeddings': tied_embeddings
     }
 
@@ -145,7 +145,7 @@ def prepare_hf_causal_lm_model_for_fsdp(model: PreTrainedModel) -> None:
     if model.config.tie_word_embeddings:
         causal_base_model._fsdp_wrap = False  # type: ignore
         #tied_embeddings._fsdp_wrap = False  # type: ignore
-        lm_head._fsdp_wrap = False  # type: ignore
+        # lm_head._fsdp_wrap = False  # type: ignore
 
     # FSDP Wrap and Activation Checkpoint every model block
     model.fsdp_wrap_fn = lambda module: isinstance(module, block_type)
