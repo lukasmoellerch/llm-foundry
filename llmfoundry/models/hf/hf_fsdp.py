@@ -122,12 +122,12 @@ def prepare_hf_causal_lm_model_for_fsdp(model: PreTrainedModel) -> None:
     lm_head = model.get_output_embeddings()
     # some models (OPT) implement .get_input_embeddings for the causal subclass
     # but all of them implement it for the base model
-    tied_embeddings = causal_base_model.get_input_embeddings()  # type: ignore
+    # tied_embeddings = causal_base_model.get_input_embeddings()  # type: ignore
     modules = {
         'base_model': causal_base_model,
         'model_block': model_block,
         'lm_head': lm_head,
-        'tied_embeddings': tied_embeddings
+       # 'tied_embeddings': tied_embeddings
     }
 
     for mod_name, module in modules.items():
@@ -144,7 +144,7 @@ def prepare_hf_causal_lm_model_for_fsdp(model: PreTrainedModel) -> None:
     # the model has this tying enabled (almost all do; this property defaults to True)
     if model.config.tie_word_embeddings:
         causal_base_model._fsdp_wrap = False  # type: ignore
-        tied_embeddings._fsdp_wrap = False  # type: ignore
+        #tied_embeddings._fsdp_wrap = False  # type: ignore
         lm_head._fsdp_wrap = False  # type: ignore
 
     # FSDP Wrap and Activation Checkpoint every model block
