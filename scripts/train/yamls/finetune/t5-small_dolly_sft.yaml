@@ -59,7 +59,7 @@ max_duration: 1ep
 eval_interval: 1 # this is the only allowed value for no eval
 # eval_first: false
 # eval_subset_num_batches: -1
-global_train_batch_size: 64 # assuming 8 gpus
+global_train_batch_size: 8 # assuming 8 gpus
 
 # System
 seed: ${global_seed}
@@ -90,13 +90,13 @@ callbacks:
   memory_monitor: {}
   runtime_estimator: {}
 
-# loggers:
-#   wandb: {}
+loggers:
+  wandb: {}
 
 # Checkpoint to local filesystem or remote object store
-# save_interval: 5000ba
-# save_num_checkpoints_to_keep: 1  # Important, this cleans up checkpoints saved to DISK
-# save_folder: ./{run_name}/checkpoints
+save_interval: 5000ba
+save_num_checkpoints_to_keep: 1  # Important, this cleans up checkpoints saved to DISK
+save_folder: ./{run_name}/checkpoints
 # save_folder: s3://my-bucket/my-folder/{run_name}/checkpoints
 
 # Load from remote object store
