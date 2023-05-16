@@ -31,7 +31,7 @@ train_loader:
     split: train
     max_seq_len: ${max_seq_len}
     allow_pad_trimming: false
-    decoder_only_format: false
+    decoder_only_format: true
     shuffle: true
   drop_last: true
   num_workers: 16
@@ -47,7 +47,7 @@ eval_loader:
     split: test
     max_seq_len: ${max_seq_len}
     allow_pad_trimming: false
-    decoder_only_format: false
+    decoder_only_format: true
     shuffle: true
   drop_last: true
   num_workers: 16
