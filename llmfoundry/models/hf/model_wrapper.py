@@ -14,7 +14,7 @@ import transformers
 from composer.models.huggingface import HuggingFaceModel
 from torchmetrics import Metric
 from transformers import PreTrainedTokenizer, PreTrainedTokenizerFast
-
+import torch.nn.functional as F
 from llmfoundry.models.hf.hf_fsdp import prepare_hf_model_for_fsdp
 
 # HuggingFace hardcodes the ignore index to -100
@@ -81,7 +81,15 @@ class HuggingFaceModelWithZLoss(HuggingFaceModel):
 
     def loss(self, outputs, batch):
         if self.config.use_return_dict:
-            loss, logits = outputs['loss'], outputs['logits']
+            logits = outputs['logits']
+            loss = None
+            labels = batch.get('labels')
+            if labels is not None:
+                labels = torch.roll(labels, shifts=-1)
+                labels[:, -1] = -100
+                loss = F.cross_entropy(
+                    logits.view(-1, logits.size(-1)), labels.to(logits.device).view(-1)
+                )
         else:
             # loss is at index 0 in the output tuple, logits are at index 1
             loss, logits = outputs[:2]
