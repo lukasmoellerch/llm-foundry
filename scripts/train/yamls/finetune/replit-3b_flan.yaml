@@ -78,7 +78,7 @@ algorithms:
     clipping_type: norm
     clipping_threshold: 1.0
 
-max_duration: 3ep  # 2-3 epochs seems like the sweet spot
+max_duration: 2ep  # 2-3 epochs seems like the sweet spot
 eval_interval: 1ep
 # eval_subset_num_batches: -1
 eval_first: false # true
@@ -117,7 +117,7 @@ loggers:
   wandb: {}
 
 # Checkpoint to local filesystem or remote object store
-save_interval: 1000ba # 5000ba
+save_interval: 2ep # 5000ba
 save_num_checkpoints_to_keep: 1  # Important, this cleans up checkpoints saved to DISK
 save_folder: ./{run_name}/checkpoints
 # save_folder: s3://my-bucket/my-folder/{run_name}/checkpoints
