@@ -44,7 +44,7 @@ eval_loader:
   name: finetuning
   dataset:
     hf_name: Muennighoff/flan
-    split: eval
+    split: validation
     max_seq_len: ${max_seq_len}
     allow_pad_trimming: false
     decoder_only_format: true
