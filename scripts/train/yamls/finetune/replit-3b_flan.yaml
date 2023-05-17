@@ -27,7 +27,7 @@ tokenizer:
 train_loader:
   name: finetuning
   dataset:
-    hf_name: HMuennighoff/flan
+    hf_name: Muennighoff/flan
     split: train
     max_seq_len: ${max_seq_len}
     allow_pad_trimming: false
@@ -43,7 +43,7 @@ train_loader:
 eval_loader:
   name: finetuning
   dataset:
-    hf_name: HMuennighoff/flan
+    hf_name: Muennighoff/flan
     split: eval
     max_seq_len: ${max_seq_len}
     allow_pad_trimming: false
