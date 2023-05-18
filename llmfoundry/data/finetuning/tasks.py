@@ -40,19 +40,19 @@ from omegaconf import DictConfig
 from streaming import StreamingDataset
 from transformers import PreTrainedTokenizer, PreTrainedTokenizerFast
 
-__all__ = ['dataset_constructor']
+__all__ = ["dataset_constructor"]
 
 Tokenizer = Union[PreTrainedTokenizer, PreTrainedTokenizerFast]
 
 
 def _tokenize_formatted_example(example: Dict[str, Any], tokenizer: Tokenizer):
-    if ('prompt' not in example) or ('response' not in example):
+    if ("prompt" not in example) or ("response" not in example):
         raise KeyError(
-            'Unable to tokenize example because it has not been properly formatted. ' +\
-            '"prompt" and "response" are required keys but at least one was missing ' +\
-            f'from {example=}.'
+            "Unable to tokenize example because it has not been properly formatted. "
+            + '"prompt" and "response" are required keys but at least one was missing '
+            + f"from {example=}."
         )
-    return tokenizer(text=example['prompt'], text_target=example['response'])
+    return tokenizer(text=example["prompt"], text_target=example["response"])
 
 
 class StreamingFinetuningDataset(StreamingDataset):
@@ -83,25 +83,26 @@ class StreamingFinetuningDataset(StreamingDataset):
             partitioned over the workers. Defaults to ``None``.
     """
 
-    def __init__(self,
-                 local: str,
-                 tokenizer: Tokenizer,
-                 remote: Optional[str] = None,
-                 split: Optional[str] = None,
-                 shuffle: bool = False,
-                 predownload: Optional[int] = 100_000,
-                 keep_zip: Optional[bool] = None,
-                 download_retry: int = 2,
-                 download_timeout: float = 60,
-                 validate_hash: Optional[str] = None,
-                 shuffle_seed: int = 9176,
-                 num_canonical_nodes: Optional[int] = 128,
-                 batch_size: Optional[int] = None,
-                 **kwargs: Any):
-
+    def __init__(
+        self,
+        local: str,
+        tokenizer: Tokenizer,
+        remote: Optional[str] = None,
+        split: Optional[str] = None,
+        shuffle: bool = False,
+        predownload: Optional[int] = 100_000,
+        keep_zip: Optional[bool] = None,
+        download_retry: int = 2,
+        download_timeout: float = 60,
+        validate_hash: Optional[str] = None,
+        shuffle_seed: int = 9176,
+        num_canonical_nodes: Optional[int] = 128,
+        batch_size: Optional[int] = None,
+        **kwargs: Any,
+    ):
         if len(kwargs) > 0:
             raise ValueError(
-                f'StreamingTextDataset() got an unexpected keyword argument: {kwargs}'
+                f"StreamingTextDataset() got an unexpected keyword argument: {kwargs}"
             )
 
         if remote is None or (local == remote):
@@ -109,22 +110,24 @@ class StreamingFinetuningDataset(StreamingDataset):
                 contents = set(os.listdir(local))
                 if split not in contents:
                     raise ValueError(
-                        f'local directory {local} does not contain split {split}'
+                        f"local directory {local} does not contain split {split}"
                     )
 
         # Build Dataset
-        super().__init__(local=local,
-                         remote=remote,
-                         split=split,
-                         shuffle=shuffle,
-                         predownload=predownload,
-                         keep_zip=keep_zip,
-                         download_retry=download_retry,
-                         download_timeout=download_timeout,
-                         validate_hash=validate_hash,
-                         shuffle_seed=shuffle_seed,
-                         num_canonical_nodes=num_canonical_nodes,
-                         batch_size=batch_size)
+        super().__init__(
+            local=local,
+            remote=remote,
+            split=split,
+            shuffle=shuffle,
+            predownload=predownload,
+            keep_zip=keep_zip,
+            download_retry=download_retry,
+            download_timeout=download_timeout,
+            validate_hash=validate_hash,
+            shuffle_seed=shuffle_seed,
+            num_canonical_nodes=num_canonical_nodes,
+            batch_size=batch_size,
+        )
 
         self.tokenizer = tokenizer
 
@@ -135,7 +138,6 @@ class StreamingFinetuningDataset(StreamingDataset):
 
 
 class DatasetConstructor:
-
     def __init__(self):
         self._task_preprocessing_registry: Dict[str, Callable] = {}
 
@@ -145,7 +147,7 @@ class DatasetConstructor:
         def _register_func(name: str, func: Callable) -> None:
             if name in self._task_preprocessing_registry:
                 raise ValueError(
-                    f'A tokenization function has already been registered with {name=}.'
+                    f"A tokenization function has already been registered with {name=}."
                 )
             self._task_preprocessing_registry[name] = func
             return
@@ -159,12 +161,14 @@ class DatasetConstructor:
 
     def print_registered_tasks(self):
         tasks = sorted(self._task_preprocessing_registry.keys())
-        print('\n'.join(tasks))
+        print("\n".join(tasks))
 
-    def get_preprocessing_fn_from_str(self,
-                                      preprocessor: Optional[str],
-                                      dataset_name: Optional[str] = None,
-                                      verbose: bool = False):
+    def get_preprocessing_fn_from_str(
+        self,
+        preprocessor: Optional[str],
+        dataset_name: Optional[str] = None,
+        verbose: bool = False,
+    ):
         """Get a preprocessing function from a string.
 
         String can be either a registered function or an import path.
@@ -192,10 +196,10 @@ class DatasetConstructor:
             else:
                 if verbose:
                     print(
-                        'No preprocessor was supplied and no preprocessing function ' +\
-                        f'is registered for dataset name "{dataset_name}". No additional ' +\
-                        'preprocessing will be applied. If the dataset is already formatted ' +\
-                        'correctly, you can ignore this message.'
+                        "No preprocessor was supplied and no preprocessing function "
+                        + f'is registered for dataset name "{dataset_name}". No additional '
+                        + "preprocessing will be applied. If the dataset is already formatted "
+                        + "correctly, you can ignore this message."
                     )
                 return None
         if preprocessor in self._task_preprocessing_registry:
@@ -206,16 +210,16 @@ class DatasetConstructor:
             return self._task_preprocessing_registry[preprocessor]
 
         try:
-            import_path, function_name = preprocessor.split(':', maxsplit=1)
+            import_path, function_name = preprocessor.split(":", maxsplit=1)
             if verbose:
                 print(
-                    f'Importing preprocessing function via: `from {import_path} import {function_name}`'
+                    f"Importing preprocessing function via: `from {import_path} import {function_name}`"
                 )
             module = importlib.import_module(import_path)
             preprocessing_fn = getattr(module, function_name)
         except Exception as e:
             raise ValueError(
-                f'Failed to import preprocessing function from string = {preprocessor}.'
+                f"Failed to import preprocessing function from string = {preprocessor}."
             ) from e
 
         return preprocessing_fn
@@ -232,9 +236,10 @@ class DatasetConstructor:
         """
         dataset_name = cfg.hf_name
         split = cfg.split
-        kwargs = cfg.get('hf_kwargs', {})
+        kwargs = cfg.get("hf_kwargs", {})
         preprocessing_fn = self.get_preprocessing_fn_from_str(
-            cfg.get('preprocessing_fn'), dataset_name, verbose=True)
+            cfg.get("preprocessing_fn"), dataset_name, verbose=True
+        )
 
         dataset = datasets.load_dataset(dataset_name, split=split, **kwargs)
 
@@ -259,58 +264,64 @@ class DatasetConstructor:
 dataset_constructor = DatasetConstructor()
 
 
-@dataset_constructor.register('tatsu-lab/alpaca')
+@dataset_constructor.register("tatsu-lab/alpaca")
 def alpaca_preprocessing_function(inp: Dict):
     """Split out prompt/response from text."""
     try:
-        prompt, response = inp['text'].split('### Response:')
-        prompt += '### Response:'
+        prompt, response = inp["text"].split("### Response:")
+        prompt += "### Response:"
     except Exception as e:
         raise ValueError(
             f"Unable to extract prompt/response from 'text'={inp['text']}"
         ) from e
-    return {'prompt': prompt, 'response': response}
+    return {"prompt": prompt, "response": response}
 
 
-@dataset_constructor.register('HuggingFaceH4/databricks_dolly_15k')
+@dataset_constructor.register("HuggingFaceH4/databricks_dolly_15k")
 def dolly_preprocessing_function(inp: Dict):
     """Format the text string."""
-    PROMPT_FORMAT = 'Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{instruction}\n\n### Response:\n'
+    PROMPT_FORMAT = "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{instruction}\n\n### Response:\n"
     try:
-        if inp['input'] != '':
-            instruction = inp['instruction'] + '\n' + inp['input']
+        if inp["input"] != "":
+            instruction = inp["instruction"] + "\n" + inp["input"]
         else:
-            instruction = inp['instruction']
+            instruction = inp["instruction"]
         prompt = PROMPT_FORMAT.format(instruction=instruction)
-        response = inp['output']
+        response = inp["output"]
     except Exception as e:
-        raise ValueError(
-            f'Unable to extract prompt/response from {inp=}') from e
-    return {'prompt': prompt, 'response': response}
+        raise ValueError(f"Unable to extract prompt/response from {inp=}") from e
+    return {"prompt": prompt, "response": response}
 
 
-@dataset_constructor.register('bigscience/P3')
+@dataset_constructor.register("bigscience/P3")
 def p3_preprocessing_function(inp: Dict):
     """Format the already-split example."""
     return {
-        'prompt': inp['inputs'] + ':',
-        'response': inp['targets'],
+        "prompt": inp["inputs"] + ":",
+        "response": inp["targets"],
+    }
+
+
+@dataset_constructor.register("lukasmoeller/chat-combined-code")
+def chat_preprocessing_function(inp: Dict):
+    """Format the already-split example."""
+    return {
+        "prompt": inp["inputs"],
+        "response": inp["targets"] + "<|endoftext|>",
     }
 
 
 # Muennighoff's P3 and flan datasets share a similar convention
-@dataset_constructor.register('Muennighoff/P3', 'Muennighoff/flan')
+@dataset_constructor.register("Muennighoff/P3", "Muennighoff/flan")
 def muennighoff_tokenize_function(inp: Dict):
     """Format the already-split example."""
     try:
-        prompt: str = inp['inputs']
-        response: str = inp['targets']
+        prompt: str = inp["inputs"]
+        response: str = inp["targets"]
         # Put a space before the response if needed
-        transitions = (' ', '\n', '\t')
-        if not (prompt.endswith(transitions) or
-                response.startswith(transitions)):
-            response = ' ' + response
+        transitions = (" ", "\n", "\t")
+        if not (prompt.endswith(transitions) or response.startswith(transitions)):
+            response = " " + response
     except Exception as e:
-        raise ValueError(
-            f'Unable to process prompt/response from {inp=}') from e
-    return {'prompt': prompt, 'response': response}
+        raise ValueError(f"Unable to process prompt/response from {inp=}") from e
+    return {"prompt": prompt, "response": response}
