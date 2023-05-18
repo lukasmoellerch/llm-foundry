@@ -1,4 +1,4 @@
-max_seq_len: 4096
+max_seq_len: 2048
 global_seed: 17
 
 # Run Name
