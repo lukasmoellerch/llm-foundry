@@ -144,23 +144,23 @@ def build_tokenizer(om_tokenizer_config: DictConfig,) -> Tokenizer:
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name,
                                               **tokenizer_kwargs)
     
-    #sp_proto = sp_model_pb.ModelProto()
-    #sp_proto.ParseFromString(Path(tokenizer.vocab_file).read_bytes())
-    #symbols = ["<|SYSTEM|>", "<|USER|>", "<|ASSISTANT|>"]
-    #print(f'Original model pieces: {len(sp_proto.pieces)}')
-    #for i, sym in enumerate(symbols, 1):
-    #    sp_proto.pieces[2+i].piece = sym 
-    #    sp_proto.pieces[2+i].score = 0.0 # default score for USER_DEFINED
-    #    sp_proto.pieces[2+i].type = 4 # type value for USER_DEFINED
-    #    
-    #    print(f'added {sym}...')
-    #print(f'New model pieces: {len(sp_proto.pieces)}')
-    ## save modified model
-    #outfile = 'out.model'
-    #with open(outfile, 'wb') as f:
-    #    f.write(sp_proto.SerializeToString())
+    sp_proto = sp_model_pb.ModelProto()
+    sp_proto.ParseFromString(Path(tokenizer.vocab_file).read_bytes())
+    symbols = ["<|SYSTEM|>", "<|USER|>", "<|ASSISTANT|>"]
+    print(f'Original model pieces: {len(sp_proto.pieces)}')
+    for i, sym in enumerate(symbols, 47):
+        sp_proto.pieces[i].piece = sym 
+        sp_proto.pieces[i].score = 0.0 # default score for USER_DEFINED
+        sp_proto.pieces[i].type = 4 # type value for USER_DEFINED
+        
+        print(f'added {sym}...')
+    print(f'New model pieces: {len(sp_proto.pieces)}')
+    # save modified model
+    outfile = 'out.model'
+    with open(outfile, 'wb') as f:
+        f.write(sp_proto.SerializeToString())
 
-    # tokenizer.sp_model.load(outfile)
+    tokenizer.sp_model.load(outfile)
 
     # HuggingFace does not respect the model_max_length kwarg, and overrides it with
     # min(kwargs['model_max_length'], original_config['model_max_length']), so we
