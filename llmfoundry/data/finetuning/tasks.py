@@ -306,8 +306,8 @@ def p3_preprocessing_function(inp: Dict):
 def chat_preprocessing_function(inp: Dict):
     """Format the already-split example."""
     return {
-        "prompt": inp["inputs"],
-        "response": inp["targets"] + "<|endoftext|>",
+        "prompt": inp["prompt"],
+        "response": inp["response"] + "<|endoftext|>",
     }
 
 
