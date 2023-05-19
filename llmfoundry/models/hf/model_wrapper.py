@@ -139,23 +139,6 @@ class HuggingFaceModelWithZLoss(HuggingFaceModel):
                 'content': model_config,
                 'class': f'{self.model.__class__.__module__}.{self.model.__class__.__name__}'
             }
-
-            if self.tokenizer is not None:
-                for tokenizer_file_name in tokenizer_dir.iterdir():
-                    tokenizer_file_path = tokenizer_dir / tokenizer_file_name
-                    tokenizer_file_extension = tokenizer_file_path.suffix
-                    if tokenizer_file_extension == '.txt':
-                        with open(tokenizer_file_path) as _tokenizer_file:
-                            tokenizer_file_content = _tokenizer_file.read().split('\n')
-                    elif tokenizer_file_extension == '.json':
-                        with open(tokenizer_file_path) as _tokenizer_file:
-                            tokenizer_file_content = json.load(_tokenizer_file)
-                    else:
-                        tokenizer_file_content = ""
-                    tokenizer_output[tokenizer_file_path.stem] = {
-                        'file_extension': tokenizer_file_extension,
-                        'content': tokenizer_file_content
-                    }
         return {'model': model_output, 'tokenizer': tokenizer_output}
     
 
