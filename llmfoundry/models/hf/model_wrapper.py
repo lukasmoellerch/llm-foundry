@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import inspect
 from collections import UserDict
+from pathlib import Path
 from typing import List, Optional, Union
 
 import torch
@@ -16,6 +17,9 @@ from torchmetrics import Metric
 from transformers import PreTrainedTokenizer, PreTrainedTokenizerFast
 import torch.nn.functional as F
 from llmfoundry.models.hf.hf_fsdp import prepare_hf_model_for_fsdp
+from transformers.modeling_outputs import CausalLMOutputWithPast
+import json
+import tempfile
 
 # HuggingFace hardcodes the ignore index to -100
 _HF_IGNORE_INDEX = -100
@@ -72,24 +76,30 @@ class HuggingFaceModelWithZLoss(HuggingFaceModel):
                 k: v for k, v in batch.items() if k in self.model_forward_args
             }
             batch["attention_mask"] = batch["attention_mask"].bool()
-            output = self.model(**batch)  # type: ignore (thirdparty)
+            outputs = self.model(**batch)  # type: ignore (thirdparty)
         else:
             raise ValueError(
                 'Unexpected batch type. Expected a dictionary with keys corresponding to the inputs to the forward function of the Huggingface model'
             )
-        return output
+        logits = outputs.logits
+        loss = None
+        labels = batch.get('labels')
+        if labels is not None:
+            labels = torch.roll(labels, shifts=-1)
+            labels[:, -1] = -100
+            loss = F.cross_entropy(
+                logits.view(-1, logits.size(-1)), labels.to(logits.device).view(-1)
+            )
+        return CausalLMOutputWithPast(
+            loss=loss,
+            logits=logits,
+            past_key_values=outputs.past_key_values,
+            hidden_states=outputs.hidden_states,
+        )
 
     def loss(self, outputs, batch):
         if self.config.use_return_dict:
-            logits = outputs['logits']
-            loss = None
-            labels = batch.get('labels')
-            if labels is not None:
-                labels = torch.roll(labels, shifts=-1)
-                labels[:, -1] = -100
-                loss = F.cross_entropy(
-                    logits.view(-1, logits.size(-1)), labels.to(logits.device).view(-1)
-                )
+            loss, logits = outputs['loss'], outputs['logits']
         else:
             # loss is at index 0 in the output tuple, logits are at index 1
             loss, logits = outputs[:2]
@@ -109,6 +119,45 @@ class HuggingFaceModelWithZLoss(HuggingFaceModel):
         else:
             outputs[0] += z_loss
             return outputs[0]
+
+    def get_metadata(self):
+        model_output = {}
+        tokenizer_output = {}
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_dir = Path(tmp_dir)
+            model_dir = tmp_dir / 'model'
+            tokenizer_dir = tmp_dir / 'tokenizer'
+            self.model.config.save_pretrained(model_dir)
+            if self.tokenizer is not None:
+                self.tokenizer.save_pretrained(tokenizer_dir)
+
+            with open(model_dir / 'config.json') as _config_file:
+                model_config = json.load(_config_file)
+
+            model_output['config'] = {
+                'file_extension': '.json',
+                'content': model_config,
+                'class': f'{self.model.__class__.__module__}.{self.model.__class__.__name__}'
+            }
+
+            if self.tokenizer is not None:
+                for tokenizer_file_name in tokenizer_dir.iterdir():
+                    tokenizer_file_path = tokenizer_dir / tokenizer_file_name
+                    tokenizer_file_extension = tokenizer_file_path.suffix
+                    if tokenizer_file_extension == '.txt':
+                        with open(tokenizer_file_path) as _tokenizer_file:
+                            tokenizer_file_content = _tokenizer_file.read().split('\n')
+                    elif tokenizer_file_extension == '.json':
+                        with open(tokenizer_file_path) as _tokenizer_file:
+                            tokenizer_file_content = json.load(_tokenizer_file)
+                    else:
+                        tokenizer_file_content = ""
+                    tokenizer_output[tokenizer_file_path.stem] = {
+                        'file_extension': tokenizer_file_extension,
+                        'content': tokenizer_file_content
+                    }
+        return {'model': model_output, 'tokenizer': tokenizer_output}
+    
 
     # def eval_forward(self, batch, outputs: Optional[Any] = None):
     #     if 'generate_output' in batch:
