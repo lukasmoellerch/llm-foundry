@@ -44,7 +44,7 @@ train_loader:
 # Optimization
 scheduler:
   name: linear_decay_with_warmup  # linear no warmup is HF default which dolly used
-  t_warmup: 1b  # add some warmup though, seems to help with MPT
+  t_warmup: 1ba  # add some warmup though, seems to help with MPT
   alpha_f: 0
 
 optimizer:
