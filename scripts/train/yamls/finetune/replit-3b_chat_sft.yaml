@@ -2,7 +2,7 @@ max_seq_len: 2048
 global_seed: 17
 
 # Run Name
-run_name: replchat-1 # If left blank, will be read from env var $COMPOSER_RUN_NAME
+run_name: replchat-2 # If left blank, will be read from env var $COMPOSER_RUN_NAME
 tokenizer_name: replit/replit-code-v1-3b
 
 model:
@@ -44,13 +44,12 @@ train_loader:
 # Optimization
 scheduler:
   name: linear_decay_with_warmup  # linear no warmup is HF default which dolly used
-  t_warmup: 10ba  # add some warmup though, seems to help with MPT
   alpha_f: 0
 
 optimizer:
   # Based on Dolly
   name: decoupled_adamw
-  lr: 5.0e-6
+  lr: 1.0e-6
   betas:
   - 0.9
   - 0.999
@@ -71,7 +70,7 @@ global_train_batch_size: 12  # somewhere in the 6-8 * numgpus range seems good
 # System
 seed: ${global_seed}
 device_eval_batch_size: 8
-device_train_microbatch_size: 1
+device_train_microbatch_size: auto
 precision: amp_bf16
 
 # FSDP
