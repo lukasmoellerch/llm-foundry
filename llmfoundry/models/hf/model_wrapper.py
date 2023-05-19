@@ -98,6 +98,7 @@ class HuggingFaceModelWithZLoss(HuggingFaceModel):
         )
 
     def loss(self, outputs, batch):
+        print(outputs)
         if self.config.use_return_dict:
             loss, logits = outputs['loss'], outputs['logits']
         else:
@@ -139,6 +140,7 @@ class HuggingFaceModelWithZLoss(HuggingFaceModel):
                 'content': model_config,
                 'class': f'{self.model.__class__.__module__}.{self.model.__class__.__name__}'
             }
+
         return {'model': model_output, 'tokenizer': tokenizer_output}
     
 
