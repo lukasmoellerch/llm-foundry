@@ -83,6 +83,7 @@ class HuggingFaceModelWithZLoss(HuggingFaceModel):
             )
         logits = outputs.logits
         loss = None
+        print(list(batch.keys()))
         labels = batch.get('labels')
         if labels is not None:
             labels = torch.roll(labels, shifts=-1)
