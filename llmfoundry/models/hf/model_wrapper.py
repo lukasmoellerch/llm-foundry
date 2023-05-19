@@ -70,6 +70,7 @@ class HuggingFaceModelWithZLoss(HuggingFaceModel):
             module)
 
     def forward(self, batch):
+        labels = batch.pop('labels')
         if isinstance(batch, dict) or isinstance(batch, UserDict):
             # Further input validation is left to the huggingface forward call
             batch = {
@@ -84,7 +85,6 @@ class HuggingFaceModelWithZLoss(HuggingFaceModel):
         logits = outputs.logits
         loss = None
         print(list(batch.keys()))
-        labels = batch.get('labels')
         if labels is not None:
             labels = torch.roll(labels, shifts=-1)
             labels[:, -1] = -100
@@ -99,7 +99,6 @@ class HuggingFaceModelWithZLoss(HuggingFaceModel):
         )
 
     def loss(self, outputs, batch):
-        print(outputs)
         if self.config.use_return_dict:
             loss, logits = outputs['loss'], outputs['logits']
         else:
