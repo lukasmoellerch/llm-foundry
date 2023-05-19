@@ -59,7 +59,7 @@ class HuggingFaceModelWithZLoss(HuggingFaceModel):
             raise ValueError(f'z_loss(={z_loss}) cannot be negative.')
 
         self.model_forward_args = inspect.getfullargspec(
-            self.model.forward).args
+            self.model.forward).args + ['labels']
 
         # Note: We need to add the FSDP related attributes to the model AFTER the super init,
         # so that the (possible) embedding resizing doesn't destroy them
