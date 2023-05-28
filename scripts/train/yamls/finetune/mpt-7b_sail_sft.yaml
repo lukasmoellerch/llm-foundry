@@ -103,7 +103,7 @@ loggers:
   wandb: {}
 
 # Checkpoint to local filesystem or remote object store
-save_interval: 2ep # 1ep
+save_interval: 1ep # 1ep
 save_num_checkpoints_to_keep: 1  # Important, this cleans up checkpoints saved to DISK
 save_folder: ./{run_name}/checkpoints
 # save_folder: s3://my-bucket/my-folder/{run_name}/checkpoints
