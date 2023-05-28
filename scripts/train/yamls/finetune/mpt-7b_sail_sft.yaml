@@ -13,7 +13,7 @@ model:
       attn_impl: triton
       # Set this to `true` if using `train_loader.dataset.packing_ratio` below
       attn_uses_sequence_id: false
-
+tokenizer_name: mosaicml/mpt-7b
 # Tokenizer
 tokenizer:
   name: mosaicml/mpt-7b
