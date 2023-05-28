@@ -10,7 +10,7 @@ model:
   pretrained_model_name_or_path: mosaicml/mpt-7b
   config_overrides:
     attn_config:
-      attn_impl: triton
+      # attn_impl: triton
       # Set this to `true` if using `train_loader.dataset.packing_ratio` below
       attn_uses_sequence_id: false
 tokenizer_name: mosaicml/mpt-7b
