@@ -2,7 +2,7 @@ max_seq_len: 2048
 global_seed: 17
 
 # Run Name
-run_name: # If left blank, will be read from env var $COMPOSER_RUN_NAME
+run_name: sail-mpt-7b-sft # If left blank, will be read from env var $COMPOSER_RUN_NAME
 
 model:
   name: hf_causal_lm
@@ -103,7 +103,7 @@ loggers:
   wandb: {}
 
 # Checkpoint to local filesystem or remote object store
-# save_interval: 5000ba
-# save_num_checkpoints_to_keep: 1  # Important, this cleans up checkpoints saved to DISK
-# save_folder: ./{run_name}/checkpoints
+save_interval: 1ep
+save_num_checkpoints_to_keep: 1  # Important, this cleans up checkpoints saved to DISK
+save_folder: ./{run_name}/checkpoints
 # save_folder: s3://my-bucket/my-folder/{run_name}/checkpoints
