@@ -1,4 +1,4 @@
-max_seq_len: 2048
+max_seq_len: 1024
 global_seed: 17
 
 # Run Name
@@ -68,7 +68,7 @@ max_duration: 2ep  # 2-3 epochs seems like the sweet spot
 eval_interval: 1
 # eval_subset_num_batches: -1
 #veval_first: true
-global_train_batch_size: 12  # somewhere in the 6-8 * numgpus range seems good
+global_train_batch_size: 2  # somewhere in the 6-8 * numgpus range seems good
 
 # System
 seed: ${global_seed}
