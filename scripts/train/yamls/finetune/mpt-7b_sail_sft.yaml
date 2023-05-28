@@ -67,7 +67,7 @@ algorithms:
 max_duration: 2ep  # 2-3 epochs seems like the sweet spot
 eval_interval: 1
 # eval_subset_num_batches: -1
-eval_first: true
+#veval_first: true
 global_train_batch_size: 48  # somewhere in the 6-8 * numgpus range seems good
 
 # System
